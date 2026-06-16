@@ -156,7 +156,7 @@ export default function Checkout({ user, orderData, onOrderComplete, onBack }) {
     if (form.paymentMethod === 'razorpay' && razorpayLoaded) {
       // Trigger Razorpay Checkout
       const options = {
-        key: 'rzp_test_T2CP5qWnV0P6M6',
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || '',
         amount: finalTotal * 100, // in paise
         currency: 'INR',
         name: 'FITTI Breakfast',
