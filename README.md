@@ -49,6 +49,8 @@ Create a `.env` file in the root directory and define the following variables:
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_public_key
 VITE_RESEND_API_KEY=your_resend_api_key
+VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
+
 ```
 
 *Note: In production, configure these variables directly in your hosting dashboard (Netlify, Vercel, etc.) instead of committing a `.env` file.*
