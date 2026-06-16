@@ -40,6 +40,7 @@ export default function Checkout({ user, orderData, onOrderComplete, onBack }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     // Dynamic load of Razorpay Checkout script
@@ -93,10 +94,6 @@ export default function Checkout({ user, orderData, onOrderComplete, onBack }) {
     if (!form.area.trim()) errs.area = 'Area is required';
     if (!form.pincode.trim() || form.pincode.length < 6) errs.pincode = 'Valid pincode required';
     if (!form.address.trim()) errs.address = 'Address is required';
-    if (form.paymentMethod === 'manual-upi') {
-      if (!form.payerName.trim()) errs.payerName = 'Name of the payer is required';
-      if (!form.transactionId.trim()) errs.transactionId = 'Transaction ID or UTR is required';
-    }
     return errs;
   };
 
@@ -145,8 +142,9 @@ export default function Checkout({ user, orderData, onOrderComplete, onBack }) {
     onOrderComplete && onOrderComplete(order);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError('');
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
@@ -154,35 +152,94 @@ export default function Checkout({ user, orderData, onOrderComplete, onBack }) {
     setIsSubmitting(true);
 
     if (form.paymentMethod === 'razorpay' && razorpayLoaded) {
-      // Trigger Razorpay Checkout
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || '',
-        amount: finalTotal * 100, // in paise
-        currency: 'INR',
-        name: 'FITTI Breakfast',
-        description: `Plan Subscription · ${orderData.days} Days`,
-        theme: {
-          color: '#76b900' // FITTI Green Accent
-        },
-        prefill: {
-          name: form.fullName,
-          contact: form.phone,
-        },
-        handler: function (response) {
-          handleOrderSubmission(response.razorpay_payment_id);
-        },
-        modal: {
-          ondismiss: function () {
-            setIsSubmitting(false);
-          }
-        }
-      };
-
       try {
+        // Step 1: Create Order on backend
+        const createOrderRes = await fetch('/api/create-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: finalTotal * 100, // in paise
+            currency: 'INR',
+            receipt: orderId,
+          }),
+        });
+
+        if (!createOrderRes.ok) {
+          const errData = await createOrderRes.json().catch(() => ({}));
+          throw new Error(errData.message || errData.error || 'Failed to create order on server');
+        }
+
+        const backendOrder = await createOrderRes.json();
+
+        // Step 2: Open Razorpay modal with order_id
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID || '',
+          amount: backendOrder.amount, // in paise
+          currency: backendOrder.currency,
+          name: 'FITTI Breakfast',
+          description: `Plan Subscription · ${orderData.days} Days`,
+          order_id: backendOrder.order_id,
+          theme: {
+            color: '#76b900' // FITTI Green Accent
+          },
+          prefill: {
+            name: form.fullName,
+            contact: form.phone,
+          },
+          handler: async function (response) {
+            try {
+              setIsSubmitting(true);
+              setSubmitError('');
+
+              // Step 3: Verify signature on backend
+              const verifyRes = await fetch('/api/verify-payment', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                }),
+              });
+
+              if (!verifyRes.ok) {
+                const verifyErr = await verifyRes.json().catch(() => ({}));
+                throw new Error(verifyErr.message || verifyErr.error || 'Payment verification failed');
+              }
+
+              // On success, finalize submission
+              handleOrderSubmission(response.razorpay_payment_id);
+            } catch (err) {
+              console.error('Payment verification handler error:', err);
+              setSubmitError(err.message || 'Payment verification failed. Please contact support.');
+              setIsSubmitting(false);
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              setIsSubmitting(false);
+              setSubmitError('Payment cancelled. Please try again.');
+            }
+          }
+        };
+
         const rzp = new window.Razorpay(options);
+
+        // Listen to payment.failed event as required
+        rzp.on('payment.failed', function (response) {
+          console.error('Payment failed:', response.error);
+          setSubmitError(response.error.description || 'Payment failed. Please try again.');
+          setIsSubmitting(false);
+        });
+
         rzp.open();
       } catch (error) {
-        console.error('Error opening Razorpay:', error);
+        console.error('Error in Razorpay integration:', error);
+        setSubmitError(error.message || 'Failed to initiate secure checkout');
         setIsSubmitting(false);
       }
     } else {
@@ -195,6 +252,7 @@ export default function Checkout({ user, orderData, onOrderComplete, onBack }) {
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
+    setSubmitError('');
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -546,90 +604,32 @@ export default function Checkout({ user, orderData, onOrderComplete, onBack }) {
                   </span>
                 </div>
 
-                {/* Payment Method Selector */}
-                <div className="form-group" style={{ marginBottom: 'var(--space-5)' }}>
-                  <label className="form-label">Payment Method</label>
-                  <div className="chip-group" style={{ marginTop: 'var(--space-2)' }}>
-                    <button
-                      type="button"
-                      className={`chip ${form.paymentMethod === 'razorpay' ? 'active' : ''}`}
-                      onClick={() => handleChange('paymentMethod', 'razorpay')}
-                      style={{ fontSize: '0.8125rem', padding: 'var(--space-2) var(--space-4)' }}
-                    >
-                      💳 Razorpay (UPI, Card, NetBanking)
-                    </button>
-                    <button
-                      type="button"
-                      className={`chip ${form.paymentMethod === 'manual-upi' ? 'active' : ''}`}
-                      onClick={() => handleChange('paymentMethod', 'manual-upi')}
-                      style={{ fontSize: '0.8125rem', padding: 'var(--space-2) var(--space-4)' }}
-                    >
-                      📱 Manual UPI Transfer
-                    </button>
+                <div className="checkout-payment-gateway-note text-secondary" style={{ fontSize: '0.8125rem', padding: 'var(--space-4)', border: '1px solid var(--fitti-border)', borderRadius: 'var(--radius-lg)', background: 'var(--fitti-green-5)', color: 'var(--fitti-text-secondary)', lineHeight: '1.6' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9375rem', fontWeight: 700, color: 'var(--fitti-green-dark)', marginBottom: '8px' }}>
+                    💳 Checkout with UPI, Card or NetBanking
                   </div>
+                  Pay securely with Razorpay. Your subscription starts immediately after payment confirmation.
                 </div>
-
-                {form.paymentMethod === 'razorpay' ? (
-                  <div className="checkout-payment-gateway-note text-secondary" style={{ fontSize: '0.8125rem', padding: 'var(--space-3) var(--space-4)', border: '1px solid var(--fitti-border)', borderRadius: 'var(--radius-md)', background: 'var(--fitti-green-5)', color: 'var(--fitti-text-secondary)', lineHeight: '1.5' }}>
-                    ⚡ **Instant Activation**: Pay securely with Razorpay using UPI, cards, net banking, or wallets. Your subscription starts immediately after payment confirmation.
-                  </div>
-                ) : (
-                  <>
-                    <div className="checkout-upi-qr-section" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)', margin: 'var(--space-4) 0', padding: 'var(--space-4)', border: '1px solid var(--fitti-border)', borderRadius: 'var(--radius-lg)', background: 'var(--fitti-green-5)' }}>
-                      <div className="checkout-upi-qr-header" style={{ textAlign: 'center', fontSize: '0.875rem', fontWeight: 600, color: 'var(--fitti-text)' }}>
-                        Scan to Pay with GPay, PhonePe, Paytm
-                      </div>
-                      <div className="checkout-upi-qr-wrap" style={{ padding: 'var(--space-3)', background: 'white', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', display: 'inline-flex' }}>
-                        <img 
-                          src={qrCodeUrl} 
-                          alt="UPI Payment QR Code" 
-                          style={{ width: '180px', height: '180px', display: 'block' }} 
-                        />
-                      </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <span className="checkout-upi-label" style={{ display: 'block', marginBottom: '4px', fontSize: '0.75rem', color: 'var(--fitti-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>UPI ID</span>
-                        <div className="checkout-upi-copy" style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                          <span className="font-mono" style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fitti-text)' }}>saravananvarun6-1@oksbi</span>
-                          <button type="button" className="btn btn-ghost btn-sm" onClick={copyUPI}>
-                            {copied ? 'Copied!' : 'Copy'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
-                      <label className="form-label" htmlFor="payerName">Name of the Payer *</label>
-                      <input
-                        id="payerName"
-                        className="form-input"
-                        type="text"
-                        placeholder="Name of the bank account holder paying"
-                        value={form.payerName}
-                        onChange={(e) => handleChange('payerName', e.target.value)}
-                      />
-                      {errors.payerName && <span className="form-error">{errors.payerName}</span>}
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="transactionId">Transaction ID / UTR *</label>
-                      <input
-                        id="transactionId"
-                        className="form-input"
-                        type="text"
-                        placeholder="Enter 12-digit transaction ID"
-                        value={form.transactionId}
-                        onChange={(e) => handleChange('transactionId', e.target.value)}
-                      />
-                      {errors.transactionId && <span className="form-error">{errors.transactionId}</span>}
-                      <p className="checkout-payment-hint">Enter your UPI transaction ID / UTR after completing the payment</p>
-                    </div>
-                  </>
-                )}
               </div>
             </ScrollReveal>
 
             {/* Submit */}
             <ScrollReveal delay={0.35}>
+              {submitError && (
+                <div className="checkout-submit-error" style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  color: '#ef4444',
+                  padding: 'var(--space-3) var(--space-4)',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  marginBottom: 'var(--space-4)',
+                  textAlign: 'center'
+                }}>
+                  ⚠️ {submitError}
+                </div>
+              )}
               <motion.button
                 type="submit"
                 className="btn btn-primary btn-lg w-full"
@@ -640,7 +640,7 @@ export default function Checkout({ user, orderData, onOrderComplete, onBack }) {
                   <span className="checkout-spinner"></span>
                 ) : (
                   <>
-                    {form.paymentMethod === 'razorpay' ? 'Pay Securely' : 'Place Order'} · ₹{finalTotal}
+                    Checkout · ₹{finalTotal}
                     <span className="btn-icon">→</span>
                   </>
                 )}

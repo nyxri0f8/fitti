@@ -31,7 +31,7 @@ export async function sendVerificationEmail(email, code) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev',
+        from: 'Fitti <orders@fitti.in>',
         to: email,
         subject: 'Fitti - Mobile Number Verification Code',
         html: `
@@ -114,7 +114,7 @@ export async function sendOrderReceiptEmail(email, order) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev',
+        from: 'Fitti <orders@fitti.in>',
         to: email,
         subject: `Fitti - Order Receipt #${order.id}`,
         html: `

@@ -166,7 +166,22 @@ export default function BreakfastBuilder({ productToAdd, onProductAddedProcessed
                                 role="button"
                                 tabIndex={0}
                               >
-                                <div className="builder-product-dot" style={{ background: product.color }}></div>
+                                 {product.image ? (
+                                   <img 
+                                     src={product.image} 
+                                     alt={product.shortName} 
+                                     className="builder-product-thumb"
+                                     style={{
+                                       width: '32px',
+                                       height: '32px',
+                                       borderRadius: '50%',
+                                       objectFit: 'cover',
+                                       flexShrink: 0
+                                     }}
+                                   />
+                                 ) : (
+                                   <div className="builder-product-dot" style={{ background: product.color }}></div>
+                                 )}
                                 <div className="builder-product-info">
                                   <span className="builder-product-name">{product.shortName}</span>
                                   <span className="builder-product-meta">{product.protein} · ₹{product.price}/day</span>
@@ -381,7 +396,22 @@ export default function BreakfastBuilder({ productToAdd, onProductAddedProcessed
                   <div className="builder-summary-products-list">
                     {selectedProductList.map(item => (
                       <div key={item.id} className="builder-summary-product" style={{ marginBottom: 'var(--space-3)' }}>
-                        <div className="builder-summary-dot" style={{ background: item.color }}></div>
+                        {item.image ? (
+                          <img 
+                            src={item.image} 
+                            alt={item.shortName} 
+                            className="builder-summary-thumb"
+                            style={{
+                              width: '24px',
+                              height: '24px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              flexShrink: 0
+                            }}
+                          />
+                        ) : (
+                          <div className="builder-summary-dot" style={{ background: item.color }}></div>
+                        )}
                         <div style={{ flex: 1 }}>
                           <span className="builder-summary-name">
                             {item.shortName} <span className="text-muted">x{item.quantity}</span>

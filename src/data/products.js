@@ -10,6 +10,7 @@ export const products = [
     color: '#5C3D2E',
     gradient: 'linear-gradient(135deg, #5C3D2E 0%, #8B6914 100%)',
     emoji: '🍫',
+    image: '/choco-fuel.jpg',
   },
   {
     id: 'peanut-power',
@@ -22,6 +23,7 @@ export const products = [
     color: '#C4903D',
     gradient: 'linear-gradient(135deg, #C4903D 0%, #E8B84B 100%)',
     emoji: '🥜',
+    image: '/peanut-power.jpg',
   },
   {
     id: 'power-bowl',
@@ -34,6 +36,7 @@ export const products = [
     color: '#4A7C3F',
     gradient: 'linear-gradient(135deg, #4A7C3F 0%, #76b900 100%)',
     emoji: '🥣',
+    image: '/power-bowl.jpg',
   },
   {
     id: 'breakfast-combo',
@@ -46,6 +49,7 @@ export const products = [
     color: '#76b900',
     gradient: 'linear-gradient(135deg, #76b900 0%, #4A7C3F 100%)',
     emoji: '🍽️',
+    image: '/breakfast-combo.jpg',
   },
 ];
 

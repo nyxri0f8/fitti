@@ -59,14 +59,51 @@ export default function ProfileView({ user, onClose, onProfileUpdate, onLogout }
     setError('');
   };
 
+  const maxDobDate = (() => {
+    const today = new Date();
+    const year = today.getFullYear() - 18;
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  })();
+
+  const handleDobChange = (e) => {
+    const dobVal = e.target.value;
+    const dobDate = new Date(dobVal);
+    let calculatedAge = '';
+    if (!isNaN(dobDate.getTime())) {
+      const today = new Date();
+      let calculated = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        calculated--;
+      }
+      calculatedAge = calculated > 0 ? String(calculated) : '';
+    }
+    setFormData(prev => ({ ...prev, dob: dobVal, age: calculatedAge }));
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     // Validations
     if (!formData.name.trim()) return setError('Name is required');
-    if (!formData.age || parseInt(formData.age, 10) <= 0) return setError('Please enter a valid age');
     if (!formData.dob) return setError('Date of Birth is required');
+
+    // Verify that the user is at least 18 years old
+    const dobDate = new Date(formData.dob);
+    const today = new Date();
+    let calculatedAge = today.getFullYear() - dobDate.getFullYear();
+    const monthDiff = today.getMonth() - dobDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+      calculatedAge--;
+    }
+    if (calculatedAge < 18) {
+      return setError('You must be at least 18 years old.');
+    }
+
+    if (!formData.age || parseInt(formData.age, 10) <= 0) return setError('Please enter a valid age');
     if (!formData.phone_number_1.trim() || formData.phone_number_1.length < 10) {
       return setError('Please enter a valid 10-digit primary phone number');
     }
@@ -378,7 +415,8 @@ export default function ProfileView({ user, onClose, onProfileUpdate, onLogout }
                       type="date"
                       className="form-input"
                       value={formData.dob}
-                      onChange={(e) => setFormData(prev => ({ ...prev, dob: e.target.value }))}
+                      onChange={handleDobChange}
+                      max={maxDobDate}
                       required
                     />
                   </div>
