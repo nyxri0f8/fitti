@@ -1,0 +1,90 @@
+/* How It Works */
+.how-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+@media (min-width: 640px) {
+  .how-steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .how-steps {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.how-step {
+  text-align: center;
+  position: relative;
+  padding: var(--space-6) var(--space-4);
+}
+
+.how-step-number {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--fitti-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-4);
+  position: relative;
+  z-index: 2;
+}
+
+.how-step-number span {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  letter-spacing: -0.02em;
+}
+
+.how-step-line {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .how-step-line {
+    display: block;
+    position: absolute;
+    top: calc(var(--space-6) + 24px);
+    left: calc(50% + 28px);
+    width: calc(100% - 56px);
+    height: 2px;
+    background: linear-gradient(90deg, var(--fitti-green-20), var(--fitti-green-5));
+    z-index: 1;
+  }
+}
+
+.how-step-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--fitti-green-5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-3);
+  color: var(--fitti-green-dark);
+}
+
+.how-step-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--fitti-text);
+  margin-bottom: var(--space-2);
+}
+
+.how-step-desc {
+  font-size: 0.8125rem;
+  color: var(--fitti-text-secondary);
+  line-height: 1.6;
+  max-width: 200px;
+  margin: 0 auto;
+}

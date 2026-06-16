@@ -1,0 +1,215 @@
+/* Admin Dashboard */
+.admin-page {
+  min-height: 100dvh;
+  background: var(--fitti-cream);
+}
+
+.admin-header {
+  background: var(--fitti-bg);
+  border-bottom: 1px solid var(--fitti-border);
+  padding: var(--space-4) 0;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+.admin-header-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.admin-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-order-count {
+  font-size: 0.75rem;
+  color: var(--fitti-text-muted);
+  font-family: var(--font-mono);
+}
+
+.admin-content {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-16);
+}
+
+.admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
+}
+
+.admin-empty {
+  text-align: center;
+  padding: var(--space-16) var(--space-8);
+  color: var(--fitti-text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* Table */
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--fitti-border);
+  border-radius: var(--radius-xl);
+  background: var(--fitti-bg);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.admin-table th {
+  font-family: var(--font-heading);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fitti-text-muted);
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--fitti-border);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--fitti-border);
+  color: var(--fitti-text-secondary);
+  vertical-align: middle;
+}
+
+.admin-table-row {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.admin-table-row:hover {
+  background: var(--fitti-green-5);
+}
+
+.admin-customer-name {
+  display: block;
+  font-weight: 600;
+  color: var(--fitti-text);
+  font-size: 0.8125rem;
+}
+
+.admin-customer-phone {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--fitti-text-muted);
+  font-family: var(--font-mono);
+}
+
+.admin-status-select {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--fitti-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  background: var(--fitti-bg);
+  color: var(--fitti-text);
+  cursor: pointer;
+  min-height: 32px;
+}
+
+/* Modal */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: var(--z-overlay);
+}
+
+.admin-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--fitti-bg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-elevated);
+  z-index: var(--z-modal);
+}
+
+.admin-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--fitti-border);
+}
+
+.admin-modal-header h3 {
+  font-family: var(--font-heading);
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.admin-modal-close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--fitti-text-muted);
+  transition: all var(--transition-fast);
+}
+
+.admin-modal-close:hover {
+  background: rgba(0,0,0,0.05);
+  color: var(--fitti-text);
+}
+
+.admin-modal-body {
+  padding: var(--space-5) var(--space-6);
+}
+
+.admin-detail-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--space-2) 0;
+  font-size: 0.8125rem;
+  gap: var(--space-4);
+}
+
+.admin-detail-label {
+  color: var(--fitti-text-muted);
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+.admin-detail-group span:last-child {
+  text-align: right;
+  color: var(--fitti-text);
+  word-break: break-word;
+}
