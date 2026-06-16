@@ -761,8 +761,14 @@ h3 {
 
 .grid-4 {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--space-4);
+}
+
+@media (min-width: 580px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (min-width: 768px) {
@@ -780,8 +786,14 @@ h3 {
 
 .grid-5 {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--space-4);
+}
+
+@media (min-width: 480px) {
+  .grid-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (min-width: 640px) {
@@ -795,6 +807,7 @@ h3 {
     grid-template-columns: repeat(5, 1fr);
   }
 }
+
 
 /* --- Utility Classes --- */
 .flex { display: flex; }
