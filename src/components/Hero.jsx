@@ -26,10 +26,20 @@ export default function Hero({ onNavigate }) {
         >
           <h1 className="hero-title">
             Fitti<span className="hero-title-dot">.</span>
+            <span style={{
+              position: 'absolute',
+              width: '1px',
+              height: '1px',
+              padding: 0,
+              margin: '-1px',
+              overflow: 'hidden',
+              clip: 'rect(0, 0, 0, 0)',
+              border: 0
+            }}> — Premium High-Protein Breakfast Delivery</span>
           </h1>
 
           <p className="hero-subtitle">
-            Fitness. Fully Managed.
+            Fitness. Fully Managed. Fresh daily in Bangalore.
           </p>
 
           <div className="hero-actions-centered">

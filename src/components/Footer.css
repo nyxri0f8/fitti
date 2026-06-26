@@ -91,3 +91,39 @@
   color: var(--fitti-text-muted);
   text-align: center;
 }
+
+.footer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: var(--space-4);
+  animation: footerFadeIn 0.3s ease;
+}
+
+.footer-modal-content {
+  width: 100%;
+  max-width: 500px;
+  background: var(--fitti-bg);
+  border-radius: 12px;
+  color: var(--fitti-text);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  animation: footerSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes footerFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes footerSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
