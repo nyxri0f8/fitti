@@ -45,6 +45,34 @@ export default function App() {
   const [pendingPage, setPendingPage] = useState(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
+  // PWA Installation prompt state
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstallBanner(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallBanner(false);
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    console.log(`PWA installation user response: ${outcome}`);
+    setInstallPrompt(null);
+    setShowInstallBanner(false);
+  };
+
   // Sync session and handle Google OAuth callback redirects
   useEffect(() => {
     if (supabase) {
@@ -337,6 +365,76 @@ export default function App() {
             onProfileUpdate={(updated) => setUser(updated)}
             onLogout={handleLogout}
           />
+        )}
+      </AnimatePresence>
+
+      {/* PWA Install Banner */}
+      <AnimatePresence>
+        {showInstallBanner && installPrompt && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              position: 'fixed',
+              bottom: '24px',
+              right: '24px',
+              zIndex: 9999,
+              background: 'rgba(18, 18, 18, 0.85)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(118, 185, 0, 0.3)',
+              borderRadius: '16px',
+              padding: '20px',
+              maxWidth: '360px',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              color: '#fff'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '8px',
+                backgroundColor: 'var(--fitti-green, #76b900)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: '900',
+                fontSize: '20px',
+                color: '#fff'
+              }}>
+                F
+              </div>
+              <div>
+                <h4 style={{ margin: 0, fontWeight: '700', fontSize: '15px' }}>Install Fitti App</h4>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'rgba(255, 255, 255, 0.7)' }}>
+                  Get quick access and offline features on your home screen.
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setShowInstallBanner(false)}
+                style={{ padding: '8px 16px', fontSize: '12px' }}
+              >
+                Not Now
+              </button>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={handleInstallClick}
+                style={{ padding: '8px 16px', fontSize: '12px' }}
+              >
+                Install
+              </button>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

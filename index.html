@@ -8,6 +8,11 @@
     <meta name="theme-color" content="#76b900" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://fitti.in/" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Fitti" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
     
     <!-- Open Graph / Social -->
     <meta property="og:title" content="FITTI — Fitness. Fully Managed." />
@@ -122,5 +127,14 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => console.log('Service Worker registered:', reg.scope))
+            .catch((err) => console.error('Service Worker registration failed:', err));
+        });
+      }
+    </script>
   </body>
 </html>

@@ -1,0 +1,18 @@
+{
+  "name": "Fitti — Fitness. Fully Managed.",
+  "short_name": "Fitti",
+  "description": "Fitness. Fully Managed. Premium chef-prepared fitness food delivered daily.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#76b900",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
