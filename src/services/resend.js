@@ -123,7 +123,7 @@ export async function sendOrderReceiptEmail(email, order) {
             <!-- Logo Header -->
             <div style="text-align: center; margin-bottom: 32px;">
               <span style="font-size: 32px; font-weight: 900; color: #76b900; letter-spacing: -0.04em;">Fitti<span style="color: #111111;">.</span></span>
-              <p style="font-size: 14px; color: #6b7280; margin: 4px 0 0 0;">Healthy Breakfast. Fully Managed.</p>
+              <p style="font-size: 14px; color: #6b7280; margin: 4px 0 0 0;">Fitness. Fully Managed.</p>
             </div>
 
             <!-- Intro -->

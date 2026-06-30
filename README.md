@@ -1,4 +1,4 @@
-# Fitti - Healthy Breakfast. Fully Managed.
+# Fitti - Fitness. Fully Managed.
 
 Fitti is a premium, high-end responsive web application for managing healthy breakfast plan subscriptions. Built with React, Vite, Framer Motion, Supabase (Database & Auth), and the Resend API (Transactional Receipts).
 

@@ -7,10 +7,23 @@ export const dbService = {
    * Save or upsert the user profile details.
    */
   async saveProfile(profile) {
+    const cleanEmail = profile.email ? profile.email.toLowerCase() : '';
+    let userId = cleanEmail; // Fallback to email if user ID is not available
+    if (supabase) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          userId = user.id;
+        }
+      } catch (e) {
+        console.warn('Could not fetch authenticated user ID, using email instead:', e.message);
+      }
+    }
+
     const formattedProfile = {
-      id: profile.email, // Use email as unique identifier
+      id: userId, // Use UUID (or email fallback) as unique identifier
       name: profile.name || null,
-      email: profile.email,
+      email: cleanEmail,
       age: profile.age ? parseInt(profile.age, 10) : null,
       dob: profile.dob || null,
       house_no: profile.house_no || null,
@@ -28,7 +41,7 @@ export const dbService = {
 
     if (supabase) {
       try {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('profiles')
           .upsert(formattedProfile);
         
@@ -36,7 +49,8 @@ export const dbService = {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(formattedProfile));
         return { success: true, data: formattedProfile };
       } catch (err) {
-        console.warn('Supabase saveProfile failed, saving to LocalStorage instead:', err.message);
+        console.error('Supabase saveProfile failed:', err.message);
+        return { success: false, error: err.message };
       }
     }
 
@@ -49,12 +63,13 @@ export const dbService = {
    * Fetch user profile details by email.
    */
   async getProfile(email) {
+    const cleanEmail = email ? email.toLowerCase() : '';
     if (supabase) {
       try {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('email', email)
+          .eq('email', cleanEmail)
           .maybeSingle();
 
         if (error) throw error;
@@ -71,7 +86,7 @@ export const dbService = {
     const local = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (local) {
       const parsed = JSON.parse(local);
-      if (parsed.email === email) {
+      if (parsed.email && parsed.email.toLowerCase() === cleanEmail) {
         return { success: true, data: parsed };
       }
     }
@@ -82,15 +97,17 @@ export const dbService = {
    * Update specific profile fields (e.g., address, name, age, mobile number).
    */
   async updateProfileFields(email, fields) {
+    const cleanEmail = email ? email.toLowerCase() : '';
     if (supabase) {
       try {
         const { error } = await supabase
           .from('profiles')
           .update({
             ...fields,
+            email: cleanEmail,
             updated_at: new Date().toISOString()
           })
-          .eq('email', email);
+          .eq('email', cleanEmail);
 
         if (error) throw error;
       } catch (err) {
@@ -102,8 +119,8 @@ export const dbService = {
     const local = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (local) {
       const parsed = JSON.parse(local);
-      if (parsed.email === email) {
-        const updated = { ...parsed, ...fields };
+      if (parsed.email && parsed.email.toLowerCase() === cleanEmail) {
+        const updated = { ...parsed, ...fields, email: cleanEmail };
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
         return { success: true, data: updated };
       }
@@ -117,7 +134,7 @@ export const dbService = {
   async saveOrder(order) {
     if (supabase) {
       try {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('orders')
           .insert({
             id: order.id,

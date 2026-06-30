@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Navbar.css';
 
-export default function Navbar({ onNavigate, user, onProfileClick }) {
+export default function Navbar({ onNavigate, user, onProfileClick, onLogout, page }) {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -66,10 +66,34 @@ export default function Navbar({ onNavigate, user, onProfileClick }) {
           </div>
 
           <div className="navbar-actions">
-            {user && (
-              <button className="navbar-profile-btn" onClick={onProfileClick} aria-label="View Profile">
-                <span className="profile-avatar-initial">{user.name.charAt(0).toUpperCase()}</span>
-              </button>
+            {page !== 'landing' && (
+              user ? (
+                <>
+                  <button className="navbar-profile-btn" onClick={onProfileClick} aria-label="View Profile" title="View Profile">
+                    <span className="profile-avatar-initial">{user.name.charAt(0).toUpperCase()}</span>
+                  </button>
+                  <button
+                    className="btn btn-secondary btn-sm navbar-logout-btn"
+                    onClick={onLogout}
+                    style={{
+                      borderColor: 'rgba(239, 68, 68, 0.25)',
+                      color: '#ef4444',
+                      background: 'rgba(239, 68, 68, 0.03)',
+                      marginRight: 'var(--space-2)'
+                    }}
+                  >
+                    LOGOUT
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="btn btn-secondary btn-sm navbar-login-btn"
+                  onClick={() => handleNavClick('auth')}
+                  style={{ marginRight: 'var(--space-2)' }}
+                >
+                  LOGIN
+                </button>
+              )
             )}
 
             <button
@@ -108,14 +132,33 @@ export default function Navbar({ onNavigate, user, onProfileClick }) {
               exit={{ y: 40, opacity: 0 }}
               transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1], delay: 0.1 }}
             >
-              {user && (
-                <motion.a
-                  className="mobile-menu-link text-green"
-                  style={{ cursor: 'pointer', fontWeight: 800, color: 'var(--fitti-green)', marginBottom: '1rem' }}
-                  onClick={() => { setIsOpen(false); onProfileClick(); }}
-                >
-                  My Profile ({user.name})
-                </motion.a>
+              {page !== 'landing' && (
+                user ? (
+                  <>
+                    <motion.a
+                      className="mobile-menu-link text-green"
+                      style={{ cursor: 'pointer', fontWeight: 800, color: 'var(--fitti-green)', marginBottom: '0.5rem' }}
+                      onClick={() => { setIsOpen(false); onProfileClick(); }}
+                    >
+                      My Profile ({user.name})
+                    </motion.a>
+                    <motion.a
+                      className="mobile-menu-link text-red"
+                      style={{ cursor: 'pointer', fontWeight: 800, color: '#ef4444', marginBottom: '1rem' }}
+                      onClick={() => { setIsOpen(false); onLogout && onLogout(); }}
+                    >
+                      Logout Account
+                    </motion.a>
+                  </>
+                ) : (
+                  <motion.a
+                    className="mobile-menu-link"
+                    style={{ cursor: 'pointer', fontWeight: 800, marginBottom: '1rem' }}
+                    onClick={() => { setIsOpen(false); handleNavClick('auth'); }}
+                  >
+                    Login / Sign In
+                  </motion.a>
+                )
               )}
 
               {navLinks.map((link, i) => (

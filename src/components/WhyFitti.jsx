@@ -18,7 +18,7 @@ const features = [
         <path d="M16 8v8l5 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
       </svg>
     ),
-    title: 'Fresh Daily',
+    title: 'Prepared Fresh',
     desc: 'Prepared every single morning. Never frozen.',
   },
   {
@@ -66,7 +66,7 @@ export default function WhyFitti() {
               <span className="eyebrow-dot"></span>
               Why FITTI
             </div>
-            <h2>Healthy Breakfast.<br /><span className="text-green">Fully Managed.</span></h2>
+            <h2>Fitness.<br /><span className="text-green">Fully Managed.</span></h2>
             <p>
               We handle everything — from sourcing ingredients to
               delivering at your door. You just wake up healthier.

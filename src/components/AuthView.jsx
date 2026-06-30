@@ -29,6 +29,11 @@ export default function AuthView({ initialGoogleUser, onAuthSuccess, onCancel })
   // Handle case where user is redirected back from Google OAuth
   useEffect(() => {
     if (initialGoogleUser) {
+      if (initialGoogleUser.phone_number_1) {
+        // Profile already complete! Bypass onboarding.
+        onAuthSuccess && onAuthSuccess(initialGoogleUser);
+        return;
+      }
       setFormData(prev => ({
         ...prev,
         name: initialGoogleUser.name || prev.name,
@@ -47,7 +52,7 @@ export default function AuthView({ initialGoogleUser, onAuthSuccess, onCancel })
       }));
       setStep('profile');
     }
-  }, [initialGoogleUser]);
+  }, [initialGoogleUser, onAuthSuccess]);
 
   const handleGoogleConnect = async () => {
     setLoading(true);
@@ -69,14 +74,22 @@ export default function AuthView({ initialGoogleUser, onAuthSuccess, onCancel })
       }
     } else {
       // Offline fallback: Simulate a Google popup connection
-      setTimeout(() => {
-        setFormData(prev => ({
-          ...prev,
-          name: 'Varun Gupta',
-          email: 'varungupta@gmail.com'
-        }));
+      setTimeout(async () => {
+        const email = 'varungupta@gmail.com';
+        const result = await dbService.getProfile(email);
         setLoading(false);
-        setStep('profile');
+        if (result.success && result.data && result.data.phone_number_1) {
+          // Fallback user profile is already complete!
+          onAuthSuccess && onAuthSuccess(result.data);
+        } else {
+          setFormData(prev => ({
+            ...prev,
+            name: 'Varun Gupta',
+            email: email,
+            ...result.data
+          }));
+          setStep('profile');
+        }
       }, 1500);
     }
   };
@@ -364,7 +377,7 @@ export default function AuthView({ initialGoogleUser, onAuthSuccess, onCancel })
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="e.g. Bangalore"
+                      placeholder="Enter City"
                       value={formData.city}
                       onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
                       required

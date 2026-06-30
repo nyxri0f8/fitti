@@ -25,7 +25,7 @@ export default function Footer({ onNavigate }) {
               FITTI
             </div>
             <p className="footer-tagline">
-              Healthy Breakfast. Fully Managed. Fresh in Bangalore, India.
+              Fitness. Fully Managed.
             </p>
           </div>
 
@@ -88,11 +88,11 @@ export default function Footer({ onNavigate }) {
                     <p style={{ marginBottom: '12px' }}><strong>Effective Date:</strong> June 26, 2026</p>
                     <p style={{ marginBottom: '12px' }}>Welcome to FITTI. By subscribing to our breakfast delivery plans, you agree to comply with and be bound by the following terms and conditions.</p>
                     <h4 style={{ color: 'var(--fitti-text)', marginTop: '16px', marginBottom: '8px' }}>1. Delivery Services</h4>
-                    <p style={{ marginBottom: '12px' }}>We deliver fresh high-protein breakfasts every morning between 6:00 AM and 9:00 AM in Bangalore, India. Deliveries are made to the address provided during checkout. Ensure delivery access is available during these hours.</p>
+                    <p style={{ marginBottom: '12px' }}>We deliver fresh high-protein breakfasts every morning between 6:00 AM and 9:00 AM. Deliveries are made to the address provided during checkout. Ensure delivery access is available during these hours.</p>
                     <h4 style={{ color: 'var(--fitti-text)', marginTop: '16px', marginBottom: '8px' }}>2. Payments and Cancellations</h4>
                     <p style={{ marginBottom: '12px' }}>Payments are made via UPI or online integrations. All transactions are final. You can pause or modify delivery dates by contacting our support team via WhatsApp at least 24 hours in advance.</p>
                     <h4 style={{ color: 'var(--fitti-text)', marginTop: '16px', marginBottom: '8px' }}>3. Food Safety</h4>
-                    <p style={{ marginBottom: '12px' }}>Meals are prepared fresh daily and should be consumed immediately or stored in a refrigerator. FITTI is not liable for health issues arising from improper storage of delivered items.</p>
+                    <p style={{ marginBottom: '12px' }}>Meals are prepared fresh and should be consumed immediately or stored in a refrigerator. FITTI is not liable for health issues arising from improper storage of delivered items.</p>
                   </>
                 )}
               </div>

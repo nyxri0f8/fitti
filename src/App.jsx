@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -18,7 +18,21 @@ import { dbService } from './services/db';
 
 // Pages: 'landing' | 'auth' | 'order' | 'checkout' | 'confirmation' | 'admin'
 export default function App() {
-  const [page, setPage] = useState('landing');
+  const [page, setPage] = useState(() => {
+    const saved = localStorage.getItem('fitti_user_profile');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.phone_number_1) {
+          return 'order';
+        }
+      } catch (e) {}
+    }
+    return 'landing';
+  });
+  const pageRef = useRef(page);
+  pageRef.current = page;
+
   const [orderData, setOrderData] = useState(null);
   const [completedOrder, setCompletedOrder] = useState(null);
   const [productToAdd, setProductToAdd] = useState(null);
@@ -36,24 +50,42 @@ export default function App() {
     if (supabase) {
       const loadProfile = async (session) => {
         if (!session) return;
-        const email = session.user.email;
+        const email = session.user.email.toLowerCase();
         const result = await dbService.getProfile(email);
-        if (result.success && result.data && result.data.phone_number_1) {
-          setUser(result.data);
-          localStorage.setItem('fitti_user_profile', JSON.stringify(result.data));
-          if (window.location.hash.includes('access_token')) {
+
+        // Read local cache to protect against transient DB query / RLS issues
+        let cachedProfile = null;
+        const local = localStorage.getItem('fitti_user_profile');
+        if (local) {
+          try {
+            const parsed = JSON.parse(local);
+            if (parsed && parsed.email && parsed.email.toLowerCase() === email) {
+              cachedProfile = parsed;
+            }
+          } catch (e) {}
+        }
+
+        const dbProfile = (result.success && result.data) ? result.data : null;
+        const finalProfile = dbProfile || cachedProfile;
+
+        if (finalProfile && finalProfile.phone_number_1) {
+          setUser(finalProfile);
+          localStorage.setItem('fitti_user_profile', JSON.stringify(finalProfile));
+          if (pageRef.current === 'landing' || pageRef.current === 'auth' || window.location.hash.includes('access_token')) {
             setPage('order');
+          }
+          if (window.location.hash.includes('access_token')) {
             window.history.replaceState(null, '', window.location.pathname);
           }
         } else {
           const profile = {
             email: session.user.email,
             name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
-            ...result.data // Merge existing details from database
+            ...finalProfile
           };
           setUser(profile);
           localStorage.setItem('fitti_user_profile', JSON.stringify(profile));
-          if (window.location.hash.includes('access_token') || !result.data?.phone_number_1) {
+          if (window.location.hash.includes('access_token') || !profile.phone_number_1) {
             setPage('auth');
             if (window.location.hash.includes('access_token')) {
               window.history.replaceState(null, '', window.location.pathname);
@@ -184,7 +216,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Navbar onNavigate={handleNavigate} page={page} user={user} onProfileClick={() => setIsProfileOpen(true)} />
+            <Navbar onNavigate={handleNavigate} page={page} user={user} onProfileClick={() => setIsProfileOpen(true)} onLogout={handleLogout} />
             <Hero onNavigate={handleNavigate} />
             <ProductShowcase onAddProduct={(product) => {
               setProductToAdd(product);
@@ -210,7 +242,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Navbar onNavigate={handleNavigate} page={page} user={user} onProfileClick={() => setIsProfileOpen(true)} />
+            <Navbar onNavigate={handleNavigate} page={page} user={user} onProfileClick={() => setIsProfileOpen(true)} onLogout={handleLogout} />
             <div style={{ paddingTop: '100px' }}>
               <AuthView initialGoogleUser={user} onAuthSuccess={handleAuthSuccess} onCancel={() => handleNavigate('landing')} />
             </div>
@@ -226,7 +258,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Navbar onNavigate={handleNavigate} page={page} user={user} onProfileClick={() => setIsProfileOpen(true)} />
+            <Navbar onNavigate={handleNavigate} page={page} user={user} onProfileClick={() => setIsProfileOpen(true)} onLogout={handleLogout} />
             <div style={{ paddingTop: '100px' }}>
               <BreakfastBuilder
                 productToAdd={productToAdd}
@@ -246,7 +278,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Navbar onNavigate={handleNavigate} page={page} user={user} onProfileClick={() => setIsProfileOpen(true)} />
+            <Navbar onNavigate={handleNavigate} page={page} user={user} onProfileClick={() => setIsProfileOpen(true)} onLogout={handleLogout} />
             <div style={{ paddingTop: '100px' }}>
               <Checkout
                 user={user}
@@ -266,7 +298,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Navbar onNavigate={handleNavigate} page={page} user={user} onProfileClick={() => setIsProfileOpen(true)} />
+            <Navbar onNavigate={handleNavigate} page={page} user={user} onProfileClick={() => setIsProfileOpen(true)} onLogout={handleLogout} />
             <div style={{ paddingTop: '100px' }}>
               <TicketView
                 user={user}

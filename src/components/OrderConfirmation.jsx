@@ -81,7 +81,7 @@ export default function OrderConfirmation({ order, onBackToHome }) {
     ctx.fillText('FITTI', canvas.width / 2, 60);
 
     ctx.font = 'italic 12px "Playfair Display", serif';
-    ctx.fillText('Healthy Breakfast. Fully Managed.', canvas.width / 2, 80);
+    ctx.fillText('Fitness. Fully Managed.', canvas.width / 2, 80);
 
     // Metadata
     ctx.font = '11px "JetBrains Mono", monospace';
@@ -257,7 +257,7 @@ export default function OrderConfirmation({ order, onBackToHome }) {
                 {/* Receipt Content */}
                 <div className="receipt-header">
                   <span className="receipt-logo">FITTI</span>
-                  <span className="receipt-tagline">Healthy Breakfast. Fully Managed.</span>
+                  <span className="receipt-tagline">Fitness. Fully Managed.</span>
                   
                   <div className="receipt-metadata">
                     <div>ORDER ID: <span className="font-mono" style={{ fontWeight: 600 }}>{order.id}</span></div>

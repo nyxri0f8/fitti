@@ -39,7 +39,7 @@ export default function Hero({ onNavigate }) {
           </h1>
 
           <p className="hero-subtitle">
-            Fitness. Fully Managed. Fresh daily in Bangalore.
+            Fitness. Fully Managed.
           </p>
 
           <div className="hero-actions-centered">
